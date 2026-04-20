@@ -75,15 +75,11 @@ export default function AuthPage() {
       <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
         {/* Logo & Intro */}
         <header style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <div style={{
-            width: '48px', height: '48px', borderRadius: '12px',
-            background: 'var(--text-primary)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 20px', fontSize: '20px', color: 'white',
-            fontFamily: 'var(--font-display)'
-          }}>
-            S
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="Logo" 
+            style={{ width: '80px', height: '80px', borderRadius: '20px', margin: '0 auto 20px', display: 'block', boxShadow: 'var(--shadow)' }} 
+          />
           <h1 className="italic" style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '8px' }}>
             {isLogin ? 'Welcome back' : 'Join SpendSmart'}
           </h1>
