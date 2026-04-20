@@ -81,7 +81,7 @@ export default function AuthPage() {
             style={{ width: '80px', height: '80px', borderRadius: '20px', margin: '0 auto 20px', display: 'block', boxShadow: 'var(--shadow)' }} 
           />
           <h1 className="italic" style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '8px' }}>
-            {isLogin ? 'Welcome back' : 'Join SpendSmart'}
+            {isLogin ? 'Welcome back' : 'Join Spendly'}
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '15px', fontFamily: 'var(--font-ui)', lineHeight: 1.5 }}>
             {isLogin ? 'Your expense journal awaits.' : 'A human-centric approach to tracking your daily habits.'}
@@ -179,7 +179,7 @@ export default function AuthPage() {
                 <Zap size={20} />
               </div>
               <div style={{ textAlign: 'left' }}>
-                <h4 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--accent-orange)' }}>EXPENSE TRACKER APP</h4>
+                <h4 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--accent-orange)' }}>SPENDLY APP</h4>
                 <p style={{ fontSize: '11px', color: 'var(--accent-orange)', opacity: 0.8 }}>Install for offline access & faster tracking</p>
               </div>
             </div>
