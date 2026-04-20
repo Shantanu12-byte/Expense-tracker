@@ -88,7 +88,7 @@ export default function AuthPage() {
             {isLogin ? 'Welcome back' : 'Join SpendSmart'}
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '15px', fontFamily: 'var(--font-ui)', lineHeight: 1.5 }}>
-            {isLogin ? 'Your mindful finance journal awaits.' : 'A human-centric approach to tracking your daily habits.'}
+            {isLogin ? 'Your expense journal awaits.' : 'A human-centric approach to tracking your daily habits.'}
           </p>
         </header>
 
