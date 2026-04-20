@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
-import { Eye, EyeOff, Download } from 'lucide-react'
+import { Eye, EyeOff, Download, Zap } from 'lucide-react'
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -24,9 +24,14 @@ export default function AuthPage() {
   }, [])
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return
+    console.log('Install button clicked. deferredPrompt:', deferredPrompt);
+    if (!deferredPrompt) {
+      toast.error('Install prompt not ready yet. Please wait a moment.')
+      return
+    }
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
+    console.log('Install outcome:', outcome);
     if (outcome === 'accepted') {
       setShowInstall(false)
     }
@@ -178,7 +183,7 @@ export default function AuthPage() {
                 <Zap size={20} />
               </div>
               <div style={{ textAlign: 'left' }}>
-                <h4 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--accent-orange)' }}>Mindful Mobile App</h4>
+                <h4 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--accent-orange)' }}>EXPENSE TRACKER APP</h4>
                 <p style={{ fontSize: '11px', color: 'var(--accent-orange)', opacity: 0.8 }}>Install for offline access & faster tracking</p>
               </div>
             </div>
