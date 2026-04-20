@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
 import { formatCurrency, getMonthRange, getCategoryIcon, getCategoryName, getCategoryColor } from '../lib/utils'
@@ -12,6 +12,7 @@ import { TrendingUp, TrendingDown, Wallet, Target, Edit2, Trash2, ChevronRight, 
 import toast from 'react-hot-toast'
 import SMSReviewModal from '../components/SMSReviewModal'
 import { syncSubscriptions } from '../lib/subscriptionUtils'
+import { parseSMS } from '../lib/smsParser'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const TREND_TABS = ['14 Days', '8 Weeks', '6 Months']
@@ -54,6 +55,40 @@ export default function DashboardPage() {
 
   useEffect(() => { loadDashboard() }, [loadDashboard])
   useEffect(() => { loadTrendData() }, [trendTab, user])
+
+  // Handle Share Target
+  const [searchParams, setSearchParams] = useSearchParams()
+  useEffect(() => {
+    const sharedText = searchParams.get('text')
+    if (sharedText && user) {
+      handleSharedSMS(sharedText)
+    }
+  }, [searchParams, user])
+
+  const handleSharedSMS = async (text) => {
+    const result = parseSMS(text)
+    if (!result || result.isRefund) {
+      toast.error('Could not parse transaction from this message')
+      setSearchParams({})
+      return
+    }
+
+    const { error } = await supabase.from('sms_imports').insert({
+      user_id: user.id,
+      sms_body: text,
+      amount: result.amount,
+      merchant: result.merchant,
+      category: result.category,
+      payment_method: result.paymentMethod,
+      is_parsed: true
+    })
+
+    if (!error) {
+      setSearchParams({}) // Clear params
+      loadPendingSMS() // Refresh count
+      setShowSMSReview(true) // Open modal
+    }
+  }
 
   // Realtime subscription
   useEffect(() => {
