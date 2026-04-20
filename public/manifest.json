@@ -1,0 +1,17 @@
+{
+  "name": "Mindful Expense Tracker",
+  "short_name": "Mindful",
+  "description": "Premium daily expense tracker for intentional spending.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F5F0",
+  "theme_color": "#1C1917",
+  "icons": [
+    {
+      "src": "/icons.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

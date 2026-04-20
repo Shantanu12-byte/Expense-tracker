@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
-import { Eye, EyeOff, TrendingUp, Shield, Zap } from 'lucide-react'
+import { Eye, EyeOff, Download } from 'lucide-react'
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -10,6 +10,28 @@ export default function AuthPage() {
   const [fullName, setFullName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [showInstall, setShowInstall] = useState(false)
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+      setShowInstall(true)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return
+    deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+    if (outcome === 'accepted') {
+      setShowInstall(false)
+    }
+    setDeferredPrompt(null)
+  }
 
   const handleAuth = async (e) => {
     e.preventDefault()
@@ -147,6 +169,52 @@ export default function AuthPage() {
             </button>
           </div>
         </div>
+
+        {/* Dedicated Install Section */}
+        {(!window.matchMedia('(display-mode: standalone)').matches) && (
+          <div style={{ marginTop: '32px', padding: '24px', background: 'var(--accent-orange-light)', borderRadius: '20px', border: '1px solid var(--accent-orange)', textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--accent-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                <Zap size={20} />
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--accent-orange)' }}>Mindful Mobile App</h4>
+                <p style={{ fontSize: '11px', color: 'var(--accent-orange)', opacity: 0.8 }}>Install for offline access & faster tracking</p>
+              </div>
+            </div>
+            
+            {showInstall ? (
+              <button 
+                onClick={handleInstall}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'var(--accent-orange)',
+                  color: 'white',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(200, 96, 42, 0.2)'
+                }}
+              >
+                <Download size={18} />
+                Install Now
+              </button>
+            ) : (
+              <p style={{ fontSize: '12px', color: 'var(--accent-orange)', fontWeight: 500, opacity: 0.9, lineHeight: 1.4 }}>
+                {/iPhone|iPad|iPod/.test(navigator.userAgent) 
+                  ? "Tap the 'Share' icon and then 'Add to Home Screen' to install. 📲" 
+                  : "Ready to be installed! Look for the install icon in your address bar. ✨"}
+              </p>
+            )}
+          </div>
+        )}
 
         <p style={{ textAlign: 'center', marginTop: '40px', color: 'var(--text-muted)', fontSize: '11px', fontFamily: 'var(--font-ui)', letterSpacing: '0.05em' }}>
           Mindful tracking for a better financial life.
