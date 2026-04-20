@@ -60,6 +60,12 @@ export default function SettingsPage() {
     setSavingBudget(false)
   }
 
+  const updateProfile = async (updates) => {
+    const { error } = await supabase.from('profiles').update(updates).eq('id', user.id)
+    if (error) { toast.error('Failed to update'); return }
+    await refreshProfile()
+  }
+
   const addCategory = async () => {
     if (!newCat.name.trim()) { toast.error('Enter category name'); return }
     const { error } = await supabase.from('categories').insert({

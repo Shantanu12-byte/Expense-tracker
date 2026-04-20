@@ -213,8 +213,9 @@ export default function AddExpensePage() {
         width: '100%',
         position: 'fixed', 
         bottom: 0, 
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: 0,
+        right: 0,
+        margin: '0 auto',
         zIndex: 1000,
         display: 'flex',
         flexDirection: 'column'
