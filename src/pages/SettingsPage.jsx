@@ -5,7 +5,7 @@ import { DEFAULT_CATEGORIES, PAYMENT_METHODS, formatCurrency } from '../lib/util
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
-import { LogOut, Plus, X, Edit2, Check, Download, ChevronRight, Palette, Trash2 } from 'lucide-react'
+import { LogOut, Plus, X, Edit2, Check, Download, ChevronRight, Palette, Trash2, Smartphone } from 'lucide-react'
 
 const CURRENCIES = [
   { code: 'INR', label: '₹ Indian Rupee' },
@@ -40,6 +40,8 @@ export default function SettingsPage() {
   const [exportStart, setExportStart] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'))
   const [exportEnd, setExportEnd] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'))
   const [deleteConfirmCat, setDeleteConfirmCat] = useState(null)
+  const [showWidgetGuide, setShowWidgetGuide] = useState(false)
+  const [activeGuideTab, setActiveGuideTab] = useState('ios')
 
   useEffect(() => {
     if (profile) {
@@ -226,6 +228,36 @@ export default function SettingsPage() {
               >
                 {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
               </select>
+            </div>
+          </div>
+        </section>
+
+        {/* Home Screen Integration */}
+        <section className="section-gap">
+          <h3 className="label-caps" style={{ marginBottom: '12px' }}>Home Screen Integration</h3>
+          <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow)' }}>
+            <div 
+              onClick={() => {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                setActiveGuideTab(isIOS ? 'ios' : 'android');
+                setShowWidgetGuide(true);
+              }}
+              style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '10px',
+                  background: 'rgba(200, 96, 42, 0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Smartphone size={20} color="var(--accent-orange)" />
+                </div>
+                <div>
+                  <span style={{ fontSize: '15px', color: 'var(--text-primary)', fontWeight: 500, display: 'block' }}>Add Homescreen Widget</span>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>Log expenses instantly in one tap</span>
+                </div>
+              </div>
+              <ChevronRight size={18} color="var(--text-muted)" />
             </div>
           </div>
         </section>
@@ -479,6 +511,156 @@ export default function SettingsPage() {
                   flex: 1, padding: '12px', borderRadius: '12px', border: 'none',
                   background: 'linear-gradient(135deg, #dc2626, #ef4444)', color: 'white', fontWeight: 600, cursor: 'pointer',
                 }}>Delete</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showWidgetGuide && (
+          <div className="modal-overlay center" onClick={() => setShowWidgetGuide(false)}>
+            <div className="modal-content center-modal" style={{ maxWidth: '420px', width: '92%' }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 className="italic font-display" style={{ fontSize: '22px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                  <span>📱</span> Home Screen Shortcut
+                </h3>
+                <button onClick={() => setShowWidgetGuide(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '20px', lineHeight: 1.5 }}>
+                Get 1-click access to add expenses right from your home screen without loading the main dashboard.
+              </p>
+
+              {/* OS Selector Tabs */}
+              <div style={{ 
+                display: 'flex', 
+                background: 'var(--bg-muted)', 
+                padding: '4px', 
+                borderRadius: '10px', 
+                marginBottom: '20px' 
+              }}>
+                <button 
+                  onClick={() => setActiveGuideTab('ios')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: activeGuideTab === 'ios' ? 'var(--bg-surface)' : 'transparent',
+                    color: activeGuideTab === 'ios' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    boxShadow: activeGuideTab === 'ios' ? 'var(--shadow)' : 'none',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                   iOS (Safari)
+                </button>
+                <button 
+                  onClick={() => setActiveGuideTab('android')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: activeGuideTab === 'android' ? 'var(--bg-surface)' : 'transparent',
+                    color: activeGuideTab === 'android' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    boxShadow: activeGuideTab === 'android' ? 'var(--shadow)' : 'none',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  🤖 Android (Chrome)
+                </button>
+              </div>
+
+              {/* App Icon Long-press Demo */}
+              <div style={{
+                background: 'var(--bg-base)',
+                borderRadius: '16px',
+                padding: '16px',
+                marginBottom: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px',
+                border: '1px solid var(--border)',
+              }}>
+                <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                  Preview: Long-press Menu
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-surface)', padding: '8px 16px', borderRadius: '14px', border: '1px solid var(--border)', width: '100%', maxWidth: '240px', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '36px', background: 'var(--text-primary)', borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: 'white' }}>💰</div>
+                  <div style={{ flex: 1, textAlign: 'left' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 600 }}>Spendly</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>PWA Shortcuts</div>
+                  </div>
+                </div>
+                <div style={{ width: '100%', maxWidth: '240px', background: 'var(--bg-surface)', borderRadius: '14px', border: '1px solid var(--border)', overflow: 'hidden', boxShadow: 'var(--shadow)', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ padding: '10px 14px', fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)' }}>
+                    <span>Add Expense</span>
+                    <span style={{ fontSize: '14px', color: 'var(--accent-orange)' }}>➕</span>
+                  </div>
+                  <div style={{ padding: '10px 14px', fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span>History</span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>🕒</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step-by-Step Guide */}
+              <div style={{ textAlign: 'left', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                {activeGuideTab === 'ios' ? (
+                  <ol style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <li>
+                      Open Safari and click the <strong>➕ (Add)</strong> button in the bottom navigation bar of Spendly to go to the add screen.
+                    </li>
+                    <li>
+                      Tap the <strong>Share</strong> button <span style={{ background: 'var(--bg-muted)', padding: '2px 6px', borderRadius: '4px', fontSize: '12px' }}>⎋</span> at the bottom of Safari.
+                    </li>
+                    <li>
+                      Scroll down and tap <strong>"Add to Home Screen"</strong>.
+                    </li>
+                    <li>
+                      This creates a standalone icon that goes <strong>directly</strong> to the add expense screen instantly!
+                    </li>
+                    <li style={{ listStyleType: 'none', borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '4px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                      💡 <strong>PWA Quick Action:</strong> If you've already installed the main app, simply press & hold the app icon on your iOS home screen to trigger the <strong>"Add Expense"</strong> quick shortcut menu.
+                    </li>
+                  </ol>
+                ) : (
+                  <ol style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <li>
+                      Open Google Chrome and tap the <strong>➕ (Add)</strong> button in the bottom navigation bar to open the add screen.
+                    </li>
+                    <li>
+                      Tap the <strong>three dots menu (⋮)</strong> in Chrome's top right corner.
+                    </li>
+                    <li>
+                      Select <strong>"Add to Home screen"</strong>.
+                    </li>
+                    <li>
+                      Save the name as "Add Expense". Chrome will add a direct launch shortcut on your home screen!
+                    </li>
+                    <li style={{ listStyleType: 'none', borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '4px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                      💡 <strong>PWA Quick Action:</strong> Once you add Spendly to your home screen, press and hold the launcher icon to see the <strong>"Add Expense"</strong> quick-add action.
+                    </li>
+                  </ol>
+                )}
+              </div>
+
+              <div style={{ marginTop: '24px' }}>
+                <button 
+                  onClick={() => setShowWidgetGuide(false)} 
+                  className="btn-primary" 
+                  style={{ width: '100%', background: 'var(--text-primary)' }}
+                >
+                  Got It
+                </button>
               </div>
             </div>
           </div>
