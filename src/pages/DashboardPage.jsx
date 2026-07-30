@@ -258,7 +258,7 @@ export default function DashboardPage() {
       {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 0 32px' }}>
         <div>
-          <p className="label-caps" style={{ marginBottom: '2px' }}>Good {getGreeting()},</p>
+          <p className="label-caps" style={{ marginBottom: '2px' }}>✨ Good {getGreeting()},</p>
           <h1 className="italic" style={{ fontSize: '28px', color: 'var(--text-primary)' }}>
             {displayName}
           </h1>
