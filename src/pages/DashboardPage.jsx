@@ -236,11 +236,38 @@ export default function DashboardPage() {
   }
 
   const deleteExpense = async (id) => {
-    const { error } = await supabase.from('expenses').delete().eq('id', id)
-    if (error) { toast.error('Failed to delete'); return }
-    toast.success('Expense deleted')
-    setDeleteId(null)
-    loadDashboard()
+    try {
+      // Fetch expense detail before deletion to know payment method and amount
+      const { data: exp, error: fetchErr } = await supabase
+        .from('expenses')
+        .select('amount, payment_method')
+        .eq('id', id)
+        .single()
+      
+      if (!fetchErr && exp) {
+        const amt = exp.amount
+        if (exp.payment_method === 'Cash') {
+          const currentCash = parseFloat(localStorage.getItem(`cash_balance_${user?.id}`)) || 0
+          const nextCash = currentCash + amt
+          localStorage.setItem(`cash_balance_${user?.id}`, nextCash.toString())
+          setCashBalance(nextCash)
+        } else if (exp.payment_method === 'UPI') {
+          const currentUpi = parseFloat(localStorage.getItem(`upi_balance_${user?.id}`)) || 0
+          const nextUpi = currentUpi + amt
+          localStorage.setItem(`upi_balance_${user?.id}`, nextUpi.toString())
+          setUpiBalance(nextUpi)
+        }
+      }
+
+      const { error } = await supabase.from('expenses').delete().eq('id', id)
+      if (error) { toast.error('Failed to delete'); return }
+      toast.success('Expense deleted')
+      setDeleteId(null)
+      loadDashboard()
+    } catch (err) {
+      console.error('Error during deletion balance update:', err)
+      toast.error('Failed to delete expense')
+    }
   }
 
   const budget = profile?.monthly_budget

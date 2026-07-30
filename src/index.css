@@ -1,23 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Geist:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-base: #F7F5F0;         /* warm off-white, main background */
-  --bg-surface: #FDFCFA;      /* card surface */
-  --bg-muted: #EDE9E0;        /* muted backgrounds, tags */
-  --bg-hover: #E8E4DC;        /* hover states */
-  --text-primary: #1C1917;    /* near-black, headings */
-  --text-secondary: #57534E;  /* body text */
-  --text-muted: #A8A29E;      /* hints, labels */
-  --accent-green: #4A7C59;    /* positive, income, success */
-  --accent-orange: #C8602A;   /* spending highlight, CTA */
-  --accent-green-light: #EBF2EE;
-  --accent-orange-light: #FAEDE6;
-  --border: #E0DBD3;
-  --border-strong: #C8C3BB;
-  --shadow: 0 1px 4px rgba(28,25,23,0.07), 0 4px 16px rgba(28,25,23,0.04);
+  --bg-base: #F5EFEB;         /* warm cream retro canvas */
+  --bg-surface: #FCFAF8;      /* clean vintage paper */
+  --bg-muted: #EAE2DB;        /* warm sand */
+  --bg-hover: #DFD7CF;        /* darker warm sand */
+  --text-primary: #1E1B18;    /* vintage charcoal */
+  --text-secondary: #5C554E;  /* warm bronze grey */
+  --text-muted: #8E847A;      /* earth tone grey */
+  --accent-green: #3F6C51;    /* sage/forest green */
+  --accent-orange: #BD532B;   /* terracotta/burnt orange */
+  --accent-green-light: #E9F0EC;
+  --accent-orange-light: #F7EBE5;
+  --border: #D6CBBF;
+  --border-strong: #A6998A;
+  --shadow: 3px 3px 0px 0px rgba(30,27,24,0.12); /* retro flat shadows */
   
-  --font-display: 'DM Serif Display', serif;
-  --font-ui: 'Geist', sans-serif;
+  --font-display: 'Fraunces', serif;
+  --font-ui: 'Plus Jakarta Sans', sans-serif;
 }
 
 * {
