@@ -8,7 +8,7 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts'
-import { TrendingUp, TrendingDown, Wallet, Target, Edit2, Trash2, ChevronRight, Receipt, ArrowRight, Users, X, Gauge } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, Target, Edit2, Trash2, ChevronRight, Receipt, ArrowRight, Users, X, Gauge, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import SMSReviewModal from '../components/SMSReviewModal'
 import { syncSubscriptions } from '../lib/subscriptionUtils'
@@ -35,6 +35,19 @@ export default function DashboardPage() {
   const [deleteId, setDeleteId] = useState(null)
   const [goals, setGoals] = useState([])
   const [isMounted, setIsMounted] = useState(false)
+
+  // Account Balance state
+  const [cashBalance, setCashBalance] = useState(() => {
+    const saved = localStorage.getItem(`cash_balance_${user?.id}`)
+    return saved !== null ? parseFloat(saved) : 0
+  })
+  const [upiBalance, setUpiBalance] = useState(() => {
+    const saved = localStorage.getItem(`upi_balance_${user?.id}`)
+    return saved !== null ? parseFloat(saved) : 0
+  })
+  const [showBalanceModal, setShowBalanceModal] = useState(false)
+  const [editCashBalance, setEditCashBalance] = useState('')
+  const [editUpiBalance, setEditUpiBalance] = useState('')
 
   const today = format(new Date(), 'yyyy-MM-dd')
 
@@ -337,6 +350,70 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* Account Balance Card */}
+      <section className="section-gap">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h3 className="label-caps">Account Balance</h3>
+          <button
+            onClick={() => {
+              setEditCashBalance(cashBalance.toString())
+              setEditUpiBalance(upiBalance.toString())
+              setShowBalanceModal(true)
+            }}
+            style={{
+              background: 'none', border: 'none', color: 'var(--accent-orange)',
+              fontSize: '11px', fontWeight: 600, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '4px',
+              fontFamily: 'var(--font-ui)'
+            }}
+          >
+            <RefreshCw size={12} /> Update
+          </button>
+        </div>
+        <div style={{
+          background: 'var(--bg-surface)',
+          borderRadius: '16px',
+          padding: '20px',
+          boxShadow: 'var(--shadow)',
+          border: '1px solid var(--border)',
+        }}>
+          {/* Total Balance */}
+          <div style={{ textAlign: 'center', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}>
+            <p className="label-caps" style={{ fontSize: '10px', marginBottom: '4px' }}>Total Balance</p>
+            <p className="amount" style={{ fontSize: '32px', color: (cashBalance + upiBalance) >= 0 ? 'var(--accent-green)' : 'var(--accent-orange)' }}>
+              {formatCurrency(cashBalance + upiBalance, currency)}
+            </p>
+          </div>
+          {/* Cash + UPI side by side */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{
+              background: 'var(--bg-base)',
+              borderRadius: '12px',
+              padding: '14px',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '20px', marginBottom: '6px' }}>💵</div>
+              <p className="label-caps" style={{ fontSize: '9px', marginBottom: '4px' }}>Cash</p>
+              <p className="amount" style={{ fontSize: '20px', fontWeight: 600, color: cashBalance >= 0 ? 'var(--text-primary)' : 'var(--accent-orange)' }}>
+                {formatCurrency(cashBalance, currency)}
+              </p>
+            </div>
+            <div style={{
+              background: 'var(--bg-base)',
+              borderRadius: '12px',
+              padding: '14px',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '20px', marginBottom: '6px' }}>📱</div>
+              <p className="label-caps" style={{ fontSize: '9px', marginBottom: '4px' }}>UPI</p>
+              <p className="amount" style={{ fontSize: '20px', fontWeight: 600, color: upiBalance >= 0 ? 'var(--text-primary)' : 'var(--accent-orange)' }}>
+                {formatCurrency(upiBalance, currency)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Goals Quick Scroll */}
       {goals.length > 0 && (
         <section className="section-gap">
@@ -628,6 +705,72 @@ export default function DashboardPage() {
           onClose={() => setShowSMSReview(false)} 
           onUpdate={loadDashboard}
         />
+      )}
+
+      {/* Update Balance Modal */}
+      {showBalanceModal && (
+        <div className="modal-overlay center" onClick={() => setShowBalanceModal(false)}>
+          <div className="modal-content center-modal" style={{ maxWidth: '360px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 className="italic" style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Wallet size={20} /> Update Balance
+              </h3>
+              <button onClick={() => setShowBalanceModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <p style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '20px', lineHeight: 1.5 }}>
+              Set your current account balances. These will be automatically reduced when you log expenses.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label className="label-caps" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span>💵</span> Cash Balance
+                </label>
+                <input
+                  type="number"
+                  value={editCashBalance}
+                  onChange={e => setEditCashBalance(e.target.value)}
+                  placeholder="Enter cash balance"
+                  className="input-field"
+                  style={{ border: 'none', background: 'var(--bg-base)' }}
+                />
+              </div>
+              <div>
+                <label className="label-caps" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span>📱</span> UPI Balance
+                </label>
+                <input
+                  type="number"
+                  value={editUpiBalance}
+                  onChange={e => setEditUpiBalance(e.target.value)}
+                  placeholder="Enter UPI balance"
+                  className="input-field"
+                  style={{ border: 'none', background: 'var(--bg-base)' }}
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                const newCash = parseFloat(editCashBalance) || 0
+                const newUpi = parseFloat(editUpiBalance) || 0
+                setCashBalance(newCash)
+                setUpiBalance(newUpi)
+                localStorage.setItem(`cash_balance_${user.id}`, newCash.toString())
+                localStorage.setItem(`upi_balance_${user.id}`, newUpi.toString())
+                setShowBalanceModal(false)
+                toast.success('Balances updated! 💰')
+              }}
+              className="btn-primary"
+              style={{ width: '100%', marginTop: '24px', background: 'var(--text-primary)' }}
+            >
+              Save Balances
+            </button>
+          </div>
+        </div>
       )}
     </motion.div>
   )

@@ -163,6 +163,16 @@ export default function AddExpensePage() {
         })
       }
 
+      // Auto-deduct from account balance
+      const expenseAmt = parseFloat(amount)
+      if (paymentMethod === 'Cash') {
+        const currentCash = parseFloat(localStorage.getItem(`cash_balance_${user.id}`)) || 0
+        localStorage.setItem(`cash_balance_${user.id}`, (currentCash - expenseAmt).toString())
+      } else if (paymentMethod === 'UPI') {
+        const currentUpi = parseFloat(localStorage.getItem(`upi_balance_${user.id}`)) || 0
+        localStorage.setItem(`upi_balance_${user.id}`, (currentUpi - expenseAmt).toString())
+      }
+
       toast.success('Expense added! 💰')
       navigate('/')
     } catch (err) {
