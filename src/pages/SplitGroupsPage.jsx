@@ -6,6 +6,7 @@ import { formatCurrency } from '../lib/utils'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import { ArrowLeft, Plus, Users, Receipt, CheckCircle2, ChevronRight, UserPlus, Trash2 } from 'lucide-react'
+import { TagChip, TransactionRow } from '../components/SharedUI'
 
 export default function SplitGroupsPage() {
   const navigate = useNavigate()
@@ -153,9 +154,9 @@ export default function SplitGroupsPage() {
         {/* Members Quick List */}
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '24px' }} className="no-scrollbar">
           {members.map(m => (
-            <div key={m.id} style={{ padding: '6px 12px', background: 'var(--bg-surface)', borderRadius: '99px', fontSize: '12px', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>
+            <TagChip key={m.id}>
               {m.display_name}
-            </div>
+            </TagChip>
           ))}
         </div>
 
@@ -167,17 +168,17 @@ export default function SplitGroupsPage() {
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {groupExpenses.map(exp => (
-              <div key={exp.id} style={{ background: 'var(--bg-surface)', padding: '16px', borderRadius: '16px', boxShadow: 'var(--shadow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <p style={{ fontWeight: 600, fontSize: '15px' }}>{exp.title}</p>
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    Paid by {members.find(m => m.id === exp.paid_by)?.display_name} • {format(new Date(exp.date), 'dd MMM')}
-                  </p>
-                </div>
-                <p style={{ fontWeight: 700 }}>{formatCurrency(exp.total_amount, currency)}</p>
-              </div>
+              <TransactionRow 
+                key={exp.id}
+                icon="🧾"
+                title={exp.title}
+                subtitle={`Paid by ${members.find(m => m.id === exp.paid_by)?.display_name} • ${format(new Date(exp.date), 'dd MMM')}`}
+                amount={exp.total_amount}
+                currency={currency}
+                isNegative={true}
+              />
             ))}
           </div>
         </section>
@@ -252,13 +253,13 @@ export default function SplitGroupsPage() {
             </div>
           ) : (
             groups.map(group => (
-              <div key={group.id} onClick={() => loadGroupDetails(group)} style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '20px', boxShadow: 'var(--shadow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+              <div key={group.id} className="glass-card pressable" onClick={() => loadGroupDetails(group)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--bg-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
                     🏘️
                   </div>
                   <div>
-                    <h4 style={{ fontWeight: 600, fontSize: '16px' }}>{group.name}</h4>
+                    <h4 style={{ fontWeight: 600, fontSize: '15px' }}>{group.name}</h4>
                     <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{format(new Date(group.created_at), 'dd MMM yyyy')}</p>
                   </div>
                 </div>

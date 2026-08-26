@@ -88,8 +88,11 @@ h1, h2, h3, .font-display {
   gap: 8px;
 }
 
-.btn-primary:active {
-  transform: scale(0.98);
+.btn-primary:active,
+.glass-card:active,
+.pressable:active {
+  box-shadow: 1px 1px 0px 0px rgba(30,27,24,0.12);
+  transform: translate(2px, 2px);
 }
 
 .input-field {

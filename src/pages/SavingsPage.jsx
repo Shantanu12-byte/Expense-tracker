@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
-import { formatCurrency } from '../lib/utils'
+import { formatCurrency, hexToRgba } from '../lib/utils'
 import { format, differenceInDays } from 'date-fns'
 import toast from 'react-hot-toast'
 import { ArrowLeft, Plus, Target, TrendingUp, CheckCircle2, AlertCircle, Calendar, Smile } from 'lucide-react'
 import confetti from 'canvas-confetti'
+import { GoalCard } from '../components/SharedUI'
 
 const GOAL_EMOJIS = ['✈️', '🏠', '📱', '💍', '🎓', '🏋️', '🚗', '💻', '🚲', '🏔️', '🎮', '⌚', '🎸', '📷', '🛋️', '🎨', '🎁', '🏖️', '🍵', '🍔']
 const PRESET_COLORS = ['#C8602A', '#4A7C59', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444']
@@ -148,72 +149,19 @@ export default function SavingsPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {activeGoals.map(goal => {
-                const pct = Math.min(100, Math.round(((goal.saved_amount || 0) / goal.target_amount) * 100))
-                const daily = getDailyNeeded(goal)
-                const onTrack = isOnTrack(goal)
-                const isOverdue = goal.deadline && new Date(goal.deadline) < new Date()
-
-                return (
-                  <div key={goal.id} className="goal-card" style={{ background: 'var(--bg-surface)', padding: '24px', borderRadius: '24px', boxShadow: 'var(--shadow)', border: '1px solid var(--border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                        <span style={{ fontSize: '32px' }}>{goal.emoji}</span>
-                        <div>
-                          <h4 style={{ fontSize: '18px', fontWeight: 700 }}>{goal.title}</h4>
-                          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                            Saved {formatCurrency(goal.saved_amount || 0, currency)} of {formatCurrency(goal.target_amount, currency)}
-                          </p>
-                        </div>
-                      </div>
-                      {goal.deadline && (
-                        <div style={{
-                          padding: '4px 10px', borderRadius: '6px', 
-                          background: isOverdue ? 'rgba(239, 68, 68, 0.1)' : (onTrack ? 'rgba(74, 124, 89, 0.1)' : 'rgba(200, 96, 42, 0.1)'),
-                          color: isOverdue ? '#EF4444' : (onTrack ? 'var(--accent-green)' : 'var(--accent-orange)'),
-                          fontSize: '10px', fontWeight: 700, textTransform: 'uppercase'
-                        }}>
-                          {isOverdue ? 'Overdue' : (onTrack ? 'On Track' : 'Needs catch up')}
-                        </div>
-                      )}
-                    </div>
-
-                    <div style={{ marginBottom: '20px' }}>
-                      <div style={{ height: '10px', background: 'var(--bg-muted)', borderRadius: '99px', overflow: 'hidden', position: 'relative' }}>
-                        <div style={{ height: '100%', width: `${pct}%`, background: goal.color || 'var(--accent-orange)', borderRadius: '99px', transition: 'width 1s ease' }} />
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: goal.color }}>{pct}%</span>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderTop: '1px solid var(--border)', marginBottom: '16px' }}>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', gap: '12px' }}>
-                        {goal.deadline ? (
-                          <>
-                            <span>📅 {format(new Date(goal.deadline), 'dd MMM yyyy')}</span>
-                            <span>⏳ {differenceInDays(new Date(goal.deadline), new Date())} days left</span>
-                          </>
-                        ) : (
-                          <span>♾️ Open-ended</span>
-                        )}
-                      </div>
-                      {goal.deadline && !isOverdue && (
-                        <div style={{ fontSize: '12px', fontWeight: 600 }}>
-                          Need <span style={{ color: 'var(--text-primary)' }}>{formatCurrency(daily, currency)}/day</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <button 
-                      onClick={() => setContributeGoal(goal)}
-                      style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--bg-muted)', border: 'none', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
-                    >
-                      + Add savings
-                    </button>
-                  </div>
-                )
-              })}
+              {activeGoals.map(goal => (
+                  <GoalCard 
+                    key={goal.id}
+                    icon={goal.emoji}
+                    title={goal.title}
+                    current={goal.saved_amount || 0}
+                    target={goal.target_amount}
+                    currency={currency}
+                    iconBg={goal.color ? hexToRgba(goal.color, 0.15) : 'var(--bg-muted)'}
+                    iconColor={goal.color || 'var(--text-primary)'}
+                    onClick={() => setContributeGoal(goal)}
+                  />
+              ))}
             </div>
           </section>
 

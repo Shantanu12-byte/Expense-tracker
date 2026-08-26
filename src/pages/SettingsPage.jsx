@@ -174,11 +174,7 @@ export default function SettingsPage() {
 
       <div className="page-enter">
         {/* Profile Card */}
-        <section style={{ 
-          background: 'var(--bg-surface)', 
-          padding: '24px', 
-          borderRadius: '16px', 
-          boxShadow: 'var(--shadow)',
+        <section className="glass-card" style={{ 
           display: 'flex',
           alignItems: 'center',
           gap: '16px',
@@ -202,9 +198,9 @@ export default function SettingsPage() {
         {/* Settings List */}
         <section className="section-gap">
           <h3 className="label-caps" style={{ marginBottom: '12px' }}>Preferences</h3>
-          <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow)' }}>
-            <div style={{ padding: '20px', borderBottom: '1px solid var(--border)' }}>
-              <label className="label-caps" style={{ display: 'block', marginBottom: '8px' }}>Monthly Budget</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="glass-card" style={{ padding: '20px', borderLeft: '4px solid var(--text-primary)' }}>
+              <label className="label-caps" style={{ display: 'block', marginBottom: '12px', fontWeight: 700 }}>Monthly Budget</label>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <input
                   type="number"
@@ -219,8 +215,8 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div style={{ padding: '20px', borderBottom: '1px solid var(--border)' }}>
-              <label className="label-caps" style={{ display: 'block', marginBottom: '8px' }}>Currency</label>
+            <div className="glass-card" style={{ padding: '20px', borderLeft: '4px solid var(--text-primary)' }}>
+              <label className="label-caps" style={{ display: 'block', marginBottom: '12px', fontWeight: 700 }}>Currency</label>
               <select
                 value={selectedCurrency}
                 onChange={e => { setSelectedCurrency(e.target.value); saveBudget() }}
@@ -235,29 +231,30 @@ export default function SettingsPage() {
         {/* Home Screen Integration */}
         <section className="section-gap">
           <h3 className="label-caps" style={{ marginBottom: '12px' }}>Home Screen Integration</h3>
-          <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div 
               onClick={() => {
                 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
                 setActiveGuideTab(isIOS ? 'ios' : 'android');
                 setShowWidgetGuide(true);
               }}
-              style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+              className="glass-card pressable"
+              style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', borderLeft: '4px solid var(--text-primary)' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{
-                  width: '36px', height: '36px', borderRadius: '10px',
-                  background: 'rgba(200, 96, 42, 0.1)',
+                  width: '40px', height: '40px', borderRadius: '50%',
+                  background: 'rgba(189, 83, 43, 0.15)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                   <Smartphone size={20} color="var(--accent-orange)" />
                 </div>
                 <div>
-                  <span style={{ fontSize: '15px', color: 'var(--text-primary)', fontWeight: 500, display: 'block' }}>Add Homescreen Widget</span>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>Log expenses instantly in one tap</span>
+                  <span className="label-caps" style={{ fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>Add Widget</span>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>Log expenses instantly</span>
                 </div>
               </div>
-              <ChevronRight size={18} color="var(--text-muted)" />
+              <ChevronRight size={20} color="var(--text-muted)" />
             </div>
           </div>
         </section>
@@ -265,27 +262,25 @@ export default function SettingsPage() {
         {/* Data Management */}
         <section className="section-gap">
           <h3 className="label-caps" style={{ marginBottom: '12px' }}>Data & Export</h3>
-          <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div 
               onClick={exportCSV}
-              style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+              className="glass-card pressable"
+              style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', borderLeft: '4px solid var(--text-primary)' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Download size={18} color="var(--text-secondary)" />
-                <span style={{ fontSize: '15px', color: 'var(--text-primary)', fontWeight: 500 }}>Export Expenses as CSV</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '50%',
+                  background: 'var(--bg-muted)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Download size={20} color="var(--text-primary)" />
+                </div>
+                <div>
+                  <span className="label-caps" style={{ fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>Export CSV</span>
+                </div>
               </div>
-              <ChevronRight size={18} color="var(--text-muted)" />
-            </div>
-            
-            <div style={{ padding: '20px', borderTop: '1px solid var(--border)', display: 'flex', gap: '12px' }}>
-              <div style={{ flex: 1 }}>
-                <label className="label-caps" style={{ fontSize: '10px' }}>From</label>
-                <input type="date" value={exportStart} onChange={e => setExportStart(e.target.value)} style={{ width: '100%', border: 'none', background: 'var(--bg-base)', padding: '8px', borderRadius: '4px', fontSize: '12px' }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="label-caps" style={{ fontSize: '10px' }}>To</label>
-                <input type="date" value={exportEnd} onChange={e => setExportEnd(e.target.value)} style={{ width: '100%', border: 'none', background: 'var(--bg-base)', padding: '8px', borderRadius: '4px', fontSize: '12px' }} />
-              </div>
+              <ChevronRight size={20} color="var(--text-muted)" />
             </div>
           </div>
         </section>
@@ -344,24 +339,30 @@ export default function SettingsPage() {
               + Add New
             </button>
           </div>
-          <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {categories.map((cat, i) => (
-              <div key={cat.id} style={{ 
-                padding: '16px 20px', 
-                borderBottom: i === categories.length - 1 ? 'none' : '1px solid var(--border)',
+              <div key={cat.id} className="glass-card" style={{ 
+                padding: '20px', 
+                borderLeft: '4px solid var(--text-primary)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px'
+                gap: '16px'
               }}>
-                <span style={{ fontSize: '18px' }}>{cat.icon}</span>
-                <span style={{ flex: 1, fontSize: '14px', fontWeight: 500 }}>{cat.name}</span>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '50%',
+                  background: 'var(--bg-muted)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+                }}>
+                  {cat.icon}
+                </div>
+                <span className="label-caps" style={{ flex: 1, fontWeight: 700, color: 'var(--text-primary)' }}>{cat.name}</span>
                 {!cat.is_default && (
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <button onClick={() => setEditCat(cat)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '13px' }}>
-                      Edit
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => setEditCat(cat)} className="pressable tag" style={{ border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Edit2 size={16} />
                     </button>
-                    <button onClick={() => setDeleteConfirmCat(cat)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}>
-                      Remove
+                    <button onClick={() => setDeleteConfirmCat(cat)} className="pressable tag" style={{ border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-orange)', background: 'rgba(189, 83, 43, 0.15)' }}>
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 )}
@@ -380,26 +381,32 @@ export default function SettingsPage() {
               + Add Preset
             </button>
           </div>
-          <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {presets.length === 0 ? (
               <p style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>No presets added yet</p>
             ) : (
               presets.map((p, i) => (
-                <div key={i} style={{ 
-                  padding: '16px 20px', 
-                  borderBottom: i === presets.length - 1 ? 'none' : '1px solid var(--border)',
+                <div key={i} className="glass-card" style={{ 
+                  padding: '20px', 
+                  borderLeft: '4px solid var(--text-primary)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px'
+                  gap: '16px'
                 }}>
-                  <span style={{ fontSize: '18px' }}>{p.icon}</span>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: '14px', fontWeight: 500 }}>{p.label}</p>
-                    <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{p.categoryName}</p>
+                  <div style={{
+                    width: '40px', height: '40px', borderRadius: '50%',
+                    background: 'var(--bg-muted)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+                  }}>
+                    {p.icon}
                   </div>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-orange)' }}>₹{p.amount}</span>
-                  <button onClick={() => removePreset(i)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}>
-                    Remove
+                  <div style={{ flex: 1 }}>
+                    <p className="label-caps" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{p.label}</p>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>{p.categoryName}</p>
+                  </div>
+                  <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--accent-orange)', marginRight: '8px' }}>₹{p.amount}</span>
+                  <button onClick={() => removePreset(i)} className="pressable tag" style={{ border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-orange)', background: 'rgba(189, 83, 43, 0.15)' }}>
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))

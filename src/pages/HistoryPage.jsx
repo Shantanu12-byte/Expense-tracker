@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
-import { formatCurrency, getCategoryColor, getCategoryIcon, getCategoryName } from '../lib/utils'
+import { formatCurrency, getCategoryColor, getCategoryIcon, getCategoryName, hexToRgba } from '../lib/utils'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth } from 'date-fns'
 import toast from 'react-hot-toast'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, X, Trash2, Filter } from 'lucide-react'
+import { TransactionRow } from '../components/SharedUI'
 
 export default function HistoryPage() {
   const { user, categories, currency } = useApp()
@@ -98,20 +99,21 @@ export default function HistoryPage() {
     >
       {/* Header */}
       <header style={{ padding: '24px 0 32px' }}>
-        <h1 className="italic" style={{ fontSize: '24px', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          {format(currentMonth, 'MMMM yyyy')}
-        </h1>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <p className="label-caps">Total Spent: {formatCurrency(monthTotal, currency)}</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
+          <div>
+            <h1 className="italic" style={{ fontSize: '32px', color: 'var(--text-primary)', lineHeight: 1 }}>{format(currentMonth, 'MMMM')}</h1>
+            <h1 className="italic" style={{ fontSize: '32px', color: 'var(--text-muted)', lineHeight: 1 }}>{format(currentMonth, 'yyyy')}</h1>
+          </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => setCurrentMonth(m => subMonth(m))} style={{ background: 'var(--bg-muted)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => setCurrentMonth(m => subMonth(m))} style={{ background: 'var(--bg-muted)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}>
               <ChevronLeft size={16} />
             </button>
-            <button onClick={() => setCurrentMonth(m => addMonth(m))} style={{ background: 'var(--bg-muted)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => setCurrentMonth(m => addMonth(m))} style={{ background: 'var(--bg-muted)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}>
               <ChevronRight size={16} />
             </button>
           </div>
         </div>
+        <p className="label-caps">Total Spent: {formatCurrency(monthTotal, currency)}</p>
       </header>
 
       {/* Calendar Grid */}
@@ -177,44 +179,55 @@ export default function HistoryPage() {
       </section>
 
       {/* Detail Panel */}
-      {showPanel && selectedDay && (
-        <section className="page-enter">
-          <div className="divider" />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 className="italic" style={{ fontSize: '20px' }}>{format(selectedDay, 'EEEE, dd MMM')}</h3>
-            <button onClick={() => setShowPanel(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-              <X size={18} />
-            </button>
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {dayExpenses.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '14px', textAlign: 'center', padding: '20px' }}>No transactions</p>
-            ) : (
-              dayExpenses.map(exp => (
-                <div key={exp.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
-                    {getCategoryIcon(categories, exp.category_id)}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: '14px', fontWeight: 500 }}>{exp.note || getCategoryName(categories, exp.category_id)}</p>
-                    <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{exp.payment_method} • {format(new Date(exp.date), 'dd MMM')}</p>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p className="amount" style={{ fontSize: '16px', marginBottom: '4px' }}>{formatCurrency(exp.amount, currency)}</p>
-                    <button 
-                      onClick={() => setDeleteId(exp.id)}
-                      style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: '11px', cursor: 'pointer', padding: 0 }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-      )}
+      <AnimatePresence>
+        {showPanel && selectedDay && (
+          <motion.section 
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            style={{
+              position: 'fixed',
+              bottom: 0, left: 0, right: 0,
+              background: 'var(--bg-surface)',
+              padding: '24px 20px 100px',
+              borderTopLeftRadius: '24px',
+              borderTopRightRadius: '24px',
+              boxShadow: '0 -8px 32px rgba(28,25,23,0.1)',
+              zIndex: 100
+            }}
+          >
+            <div style={{ width: '32px', height: '4px', background: 'var(--bg-muted)', borderRadius: '99px', margin: '0 auto 24px' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 className="italic" style={{ fontSize: '20px' }}>{format(selectedDay, 'EEEE, dd MMM')}</h3>
+              <button onClick={() => setShowPanel(false)} className="pressable" style={{ background: 'var(--bg-muted)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {dayExpenses.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '14px', textAlign: 'center', padding: '20px' }}>No transactions</p>
+              ) : (
+                dayExpenses.map(exp => (
+                  <TransactionRow 
+                    key={exp.id}
+                    icon={getCategoryIcon(categories, exp.category_id)}
+                    title={exp.note || getCategoryName(categories, exp.category_id)}
+                    subtitle={`${exp.payment_method} • ${format(new Date(exp.date), 'dd MMM')}`}
+                    amount={exp.amount}
+                    currency={currency}
+                    isNegative={true}
+                    iconBg={hexToRgba(getCategoryColor(categories, exp.category_id), 0.15)}
+                    iconColor={getCategoryColor(categories, exp.category_id)}
+                    onClick={() => setDeleteId(exp.id)}
+                  />
+                ))
+              )}
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
 
       {/* Delete Confirm */}
       {deleteId && (

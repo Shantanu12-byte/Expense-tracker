@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import { ArrowLeft, Plus, Trash2, Calendar, ExternalLink, Bell } from 'lucide-react'
 import { syncSubscriptions } from '../lib/subscriptionUtils'
 import { motion } from 'framer-motion'
+import { BalanceHeroCard, TransactionRow } from '../components/SharedUI'
 
 export default function SubscriptionsPage() {
   const navigate = useNavigate()
@@ -95,47 +96,50 @@ export default function SubscriptionsPage() {
 
       {/* Summary Card */}
       <section className="section-gap">
-        <div style={{ background: 'var(--text-primary)', color: 'white', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow)' }}>
-          <p className="label-caps" style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>Monthly Commitment</p>
-          <h2 className="amount" style={{ fontSize: '32px' }}>{formatCurrency(totalMonthly, currency)}</h2>
-        </div>
+        <BalanceHeroCard 
+          title="Monthly Commitment"
+          amount={totalMonthly}
+          currency={currency}
+          variant="expense"
+        />
       </section>
 
       {/* Subs List */}
-      <section className="section-gap">
+      <section className="section-gap" style={{ paddingBottom: '100px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h3 className="label-caps">Active Services</h3>
-          <button onClick={() => setShowAdd(true)} style={{ background: 'var(--accent-orange)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '99px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
-            + Add New
-          </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           {subs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px', background: 'var(--bg-surface)', borderRadius: '16px', color: 'var(--text-muted)' }}>
               No active subscriptions tracked.
             </div>
           ) : (
-            subs.map(sub => (
-              <div key={sub.id} style={{ background: 'var(--bg-surface)', padding: '16px', borderRadius: '16px', boxShadow: 'var(--shadow)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--bg-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
-                  {sub.name[0].toUpperCase()}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: 600, fontSize: '15px' }}>{sub.name}</p>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                    Next: {format(new Date(sub.next_renewal_date), 'dd MMM')} • {sub.billing_cycle}
-                  </p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontWeight: 700, color: 'var(--accent-orange)' }}>{formatCurrency(sub.amount, currency)}</p>
-                  <button onClick={() => deleteSub(sub.id)} style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: '11px', cursor: 'pointer' }}>Remove</button>
-                </div>
-              </div>
+            subs.map((sub, i) => (
+              <TransactionRow 
+                key={sub.id}
+                icon={sub.name[0].toUpperCase()}
+                title={sub.name}
+                subtitle={`Next: ${format(new Date(sub.next_renewal_date), 'dd MMM')} • ${sub.billing_cycle}`}
+                amount={sub.amount}
+                currency={currency}
+                isNegative={true}
+                iconBg="rgba(189, 83, 43, 0.15)"
+                iconColor="var(--accent-orange)"
+                onClick={() => deleteSub(sub.id)}
+              />
             ))
           )}
         </div>
       </section>
+
+      {/* Fixed Add Button */}
+      <div style={{ position: 'fixed', bottom: '80px', left: 0, right: 0, padding: '0 20px', display: 'flex', justifyContent: 'center', zIndex: 10, pointerEvents: 'none' }}>
+        <button onClick={() => setShowAdd(true)} className="btn-primary" style={{ padding: '16px 32px', borderRadius: '99px', fontSize: '16px', fontWeight: 600, pointerEvents: 'auto', boxShadow: 'var(--shadow)' }}>
+          + Add Subscription
+        </button>
+      </div>
 
       {/* Add Modal */}
       {showAdd && (

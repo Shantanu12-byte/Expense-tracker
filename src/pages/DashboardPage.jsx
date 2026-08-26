@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
-import { formatCurrency, getMonthRange, getCategoryIcon, getCategoryName, getCategoryColor } from '../lib/utils'
+import { formatCurrency, getMonthRange, getCategoryIcon, getCategoryName, getCategoryColor, hexToRgba } from '../lib/utils'
 import { format, subDays, startOfWeek, subWeeks, subMonths, startOfMonth, endOfMonth, getDaysInMonth } from 'date-fns'
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -14,6 +14,7 @@ import SMSReviewModal from '../components/SMSReviewModal'
 import { syncSubscriptions } from '../lib/subscriptionUtils'
 import { parseSMS } from '../lib/smsParser'
 import { motion, AnimatePresence } from 'framer-motion'
+import { StatChip, TransactionRow, TagChip } from '../components/SharedUI'
 
 const TREND_TABS = ['14 Days', '8 Weeks', '6 Months']
 
@@ -298,7 +299,7 @@ export default function DashboardPage() {
       {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 0 32px' }}>
         <div>
-          <p className="label-caps" style={{ marginBottom: '2px' }}>✨ Good {getGreeting()},</p>
+          <p className="label-caps" style={{ marginBottom: '2px', letterSpacing: '0.08em' }}>✨ Good {getGreeting()},</p>
           <h1 className="italic" style={{ fontSize: '28px', color: 'var(--text-primary)' }}>
             {displayName}
           </h1>
@@ -308,7 +309,8 @@ export default function DashboardPage() {
           background: 'var(--bg-muted)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)',
-          fontFamily: 'var(--font-ui)'
+          fontFamily: 'var(--font-ui)',
+          boxShadow: 'var(--shadow)'
         }}>
           {profile?.full_name?.split(' ').map(n => n[0]).join('') || 'A'}
         </div>
@@ -316,19 +318,20 @@ export default function DashboardPage() {
 
       {/* Hero Spending Card */}
       <section className="section-gap">
-        <div style={{
-          background: 'var(--text-primary)',
-          borderRadius: '16px',
-          padding: '24px',
-          color: 'var(--bg-surface)',
-          boxShadow: '0 12px 32px rgba(28,25,23,0.15)',
+        <div className="glass-card" style={{
+          marginBottom: '0',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          background: 'var(--accent-green)',
+          border: 'none',
+          boxShadow: 'var(--shadow)',
+          padding: '24px',
+          borderRadius: '20px'
         }}>
-          <p className="label-caps" style={{ color: '#A8A29E', letterSpacing: '0.08em', marginBottom: '8px' }}>
+          <p className="label-caps" style={{ color: 'rgba(255, 255, 255, 0.8)', letterSpacing: '0.08em', marginBottom: '8px' }}>
             Spent this month
           </p>
-          <h2 className="amount" style={{ fontSize: '48px', lineHeight: 1, marginBottom: '24px' }}>
+          <h2 className="amount" style={{ fontSize: '48px', lineHeight: 1, marginBottom: '24px', color: 'var(--bg-surface)' }}>
             {formatCurrency(monthTotal, currency)}
           </h2>
           
@@ -344,33 +347,30 @@ export default function DashboardPage() {
             
             // Pace state
             let paceStatus = 'on'
-            let paceColor = 'rgba(255,255,255,0.2)'
-            if (budgetUsedPct > dayProgressPct + 5) { paceStatus = 'fast'; paceColor = 'var(--accent-orange)' }
-            else if (budgetUsedPct < dayProgressPct - 5) { paceStatus = 'slow'; paceColor = 'var(--accent-green)' }
+            if (budgetUsedPct > dayProgressPct + 5) { paceStatus = 'fast' }
+            else if (budgetUsedPct < dayProgressPct - 5) { paceStatus = 'slow' }
 
             return (
               <>
-                <div style={{ marginBottom: '12px', position: 'relative', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '99px' }}>
-                  {/* Day Progress Layer */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${dayProgressPct}%`, background: 'rgba(255,255,255,0.05)', borderRadius: '99px' }} />
+                <div style={{ marginBottom: '12px', position: 'relative', height: '6px', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '99px' }}>
                   {/* Spend Progress Layer */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${Math.min(100, budgetUsedPct)}%`, background: paceStatus === 'fast' ? 'var(--accent-orange)' : (paceStatus === 'slow' ? 'var(--accent-green)' : 'white'), borderRadius: '99px', transition: 'width 1s ease' }} />
+                  <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${Math.min(100, budgetUsedPct)}%`, background: 'var(--accent-orange)', borderRadius: '99px', transition: 'width 1s ease' }} />
                   {/* Today Marker */}
-                  <div style={{ position: 'absolute', top: '-4px', left: `${dayProgressPct}%`, height: '14px', width: '2px', background: 'rgba(255,255,255,0.4)', borderRadius: '1px' }} />
+                  <div style={{ position: 'absolute', top: '-4px', left: `${dayProgressPct}%`, height: '14px', width: '2px', background: 'rgba(255, 255, 255, 0.5)', borderRadius: '1px' }} />
                 </div>
                 
-                <p style={{ fontFamily: 'var(--font-ui)', fontSize: '12px', color: '#78716C', display: 'flex', justifyContent: 'space-between' }}>
+                <p style={{ fontFamily: 'var(--font-ui)', fontSize: '12px', color: 'rgba(255, 255, 255, 0.8)', display: 'flex', justifyContent: 'space-between' }}>
                   <span>
                     {paceStatus === 'fast' ? `Spending fast — ${formatCurrency(Math.abs(delta), currency)} over expected` : 
                      paceStatus === 'slow' ? `Great pace — ${formatCurrency(Math.abs(delta), currency)} under budget` : 
                      'On pace'}
                   </span>
-                  <span style={{ fontWeight: 600, color: '#A8A29E' }}>{formatCurrency(dailyAllowance, currency)}/day left</span>
+                  <span style={{ fontWeight: 600, color: 'var(--bg-surface)' }}>{formatCurrency(dailyAllowance, currency)}/day left</span>
                 </p>
               </>
             )
           })() : (
-            <p style={{ fontFamily: 'var(--font-ui)', fontSize: '12px', color: '#78716C' }}>
+            <p style={{ fontFamily: 'var(--font-ui)', fontSize: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
               Set a monthly budget to see your pace
             </p>
           )}
@@ -407,7 +407,7 @@ export default function DashboardPage() {
           {/* Total Balance */}
           <div style={{ textAlign: 'center', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}>
             <p className="label-caps" style={{ fontSize: '10px', marginBottom: '4px' }}>Total Balance</p>
-            <p className="amount" style={{ fontSize: '32px', color: (cashBalance + upiBalance) >= 0 ? 'var(--accent-green)' : 'var(--accent-orange)' }}>
+            <p className="amount" style={{ fontSize: '32px', color: 'var(--accent-green)' }}>
               {formatCurrency(cashBalance + upiBalance, currency)}
             </p>
           </div>
@@ -419,9 +419,9 @@ export default function DashboardPage() {
               padding: '14px',
               textAlign: 'center',
             }}>
-              <div style={{ fontSize: '20px', marginBottom: '6px' }}>💵</div>
+              <div style={{ fontSize: '20px', marginBottom: '6px', background: 'rgba(63, 108, 81, 0.15)', display: 'inline-flex', width: '40px', height: '40px', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>💵</div>
               <p className="label-caps" style={{ fontSize: '9px', marginBottom: '4px' }}>Cash</p>
-              <p className="amount" style={{ fontSize: '20px', fontWeight: 600, color: cashBalance >= 0 ? 'var(--text-primary)' : 'var(--accent-orange)' }}>
+              <p className="amount" style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)' }}>
                 {formatCurrency(cashBalance, currency)}
               </p>
             </div>
@@ -431,9 +431,9 @@ export default function DashboardPage() {
               padding: '14px',
               textAlign: 'center',
             }}>
-              <div style={{ fontSize: '20px', marginBottom: '6px' }}>📱</div>
+              <div style={{ fontSize: '20px', marginBottom: '6px', background: 'var(--bg-muted)', display: 'inline-flex', width: '40px', height: '40px', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>📱</div>
               <p className="label-caps" style={{ fontSize: '9px', marginBottom: '4px' }}>UPI</p>
-              <p className="amount" style={{ fontSize: '20px', fontWeight: 600, color: upiBalance >= 0 ? 'var(--text-primary)' : 'var(--accent-orange)' }}>
+              <p className="amount" style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)' }}>
                 {formatCurrency(upiBalance, currency)}
               </p>
             </div>
@@ -537,25 +537,30 @@ export default function DashboardPage() {
       })()}
 
       {/* Quick Stats Row */}
-      <section className="section-gap" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-        <StatCard label="Today" value={todayTotal} currency={currency} />
-        <StatCard label="This Week" value={weekTotal} currency={currency} />
-        <StatCard label="Avg/Day" value={monthTotal / (new Date().getDate())} currency={currency} />
+      <section className="section-gap" style={{ display: 'flex', gap: '12px' }}>
+        <StatChip label="Income" amount={0} currency={currency} type="income" icon={<TrendingUp size={18} />} />
+        <StatChip label="Expenses" amount={monthTotal} currency={currency} type="expense" icon={<TrendingDown size={18} />} />
       </section>
 
       {/* Advanced Features Quick Access */}
       <section className="section-gap" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-        <button onClick={() => navigate('/subscriptions')} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-          <Receipt size={20} color="var(--accent-orange)" />
-          <span style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Subs</span>
+        <button onClick={() => navigate('/subscriptions')} className="glass-card pressable" style={{ padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', border: 'none', background: 'var(--bg-surface)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(189, 83, 43, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Receipt size={20} color="var(--accent-orange)" />
+          </div>
+          <span style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-primary)' }}>Subs</span>
         </button>
-        <button onClick={() => navigate('/savings')} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-          <Target size={20} color="var(--accent-green)" />
-          <span style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Goals</span>
+        <button onClick={() => navigate('/savings')} className="glass-card pressable" style={{ padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', border: 'none', background: 'var(--bg-surface)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(63, 108, 81, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Target size={20} color="var(--accent-green)" />
+          </div>
+          <span style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-primary)' }}>Goals</span>
         </button>
-        <button onClick={() => navigate('/splits')} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-          <Users size={20} color="#3b82f6" />
-          <span style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Splits</span>
+        <button onClick={() => navigate('/splits')} className="glass-card pressable" style={{ padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', border: 'none', background: 'var(--bg-surface)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Users size={20} color="#3b82f6" />
+          </div>
+          <span style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-primary)' }}>Splits</span>
         </button>
       </section>
       
@@ -597,44 +602,61 @@ export default function DashboardPage() {
 
       {/* Category Breakdown */}
       <section className="section-gap">
-        <h3 className="italic" style={{ fontSize: '20px', marginBottom: '16px' }}>Where it goes</h3>
-        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px', margin: '0 -20px', padding: '0 20px' }} className="no-scrollbar">
-          {categoryData.map((cat, i) => (
-            <div key={i} style={{
-              flexShrink: 0,
-              padding: '12px 16px',
-              borderRadius: '12px',
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              minWidth: '140px'
-            }}>
-              <span style={{ fontSize: '20px' }}>{cat.icon}</span>
-              <div>
-                <p style={{ fontSize: '11px', fontWeight: 500, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{cat.name}</p>
-                <p className="amount" style={{ fontSize: '16px' }}>{formatCurrency(cat.value, currency)}</p>
-              </div>
-            </div>
-          ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h3 className="italic" style={{ fontSize: '20px' }}>Where it goes</h3>
+          <button onClick={() => navigate('/analytics')} style={{ background: 'none', border: 'none', color: 'var(--accent-orange)', fontSize: '11px', fontWeight: 600 }}>
+            Full Report
+          </button>
         </div>
+        
+        {categoryData.length === 0 ? (
+          <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px', fontSize: '14px' }}>No spending yet</p>
+        ) : (
+          <div className="glass-card pressable" onClick={() => navigate('/analytics')} style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer' }}>
+            <div style={{ width: '100px', height: '100px', flexShrink: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    innerRadius={30}
+                    outerRadius={45}
+                    paddingAngle={2}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {categoryData.slice(0, 3).map((cat, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: cat.color }} />
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)' }}>{cat.name}</p>
+                    <p style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{cat.pct}%</p>
+                  </div>
+                  <p className="amount" style={{ fontSize: '13px' }}>{formatCurrency(cat.value, currency)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Spending Trend */}
       <section className="section-gap">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h3 className="italic" style={{ fontSize: '20px' }}>Spending trend</h3>
-          <div style={{ display: 'flex', background: 'var(--bg-muted)', padding: '2px', borderRadius: '99px' }}>
-            {['D', 'W', 'M'].map((t, i) => (
-              <button key={t} onClick={() => setTrendTab(i)} style={{
-                padding: '4px 12px', borderRadius: '99px', fontSize: '11px', fontWeight: 600, border: 'none',
-                background: trendTab === i ? 'var(--text-primary)' : 'transparent',
-                color: trendTab === i ? 'white' : 'var(--text-muted)', cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {['14D', '8W', '6M'].map((t, i) => (
+              <TagChip key={t} active={trendTab === i} onClick={() => setTrendTab(i)} style={{ padding: '4px 12px', fontSize: '11px' }}>
                 {t}
-              </button>
+              </TagChip>
             ))}
           </div>
         </div>
@@ -642,7 +664,7 @@ export default function DashboardPage() {
           {isMounted && (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData}>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} padding={{ left: 10, right: 10 }} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 10, fontWeight: 500 }} padding={{ left: 10, right: 10 }} />
                 <YAxis hide domain={[0, 'auto']} />
                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--border)', strokeWidth: 1 }} />
                 <Line 
@@ -661,55 +683,31 @@ export default function DashboardPage() {
 
       {/* Recent Transactions */}
       <section>
-        <h3 className="label-caps" style={{ marginBottom: '16px' }}>Recent</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h3 className="label-caps">Transactions</h3>
+          <div className="tag">For the Period</div>
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {recentExpenses.length === 0 ? (
             <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px', fontSize: '14px' }}>No transactions yet</p>
           ) : (
-            recentExpenses.map((exp, i) => (
-              <div key={exp.id} style={{
-                display: 'flex', alignItems: 'center', gap: '16px',
-                padding: '16px 0',
-                borderBottom: i === recentExpenses.length - 1 ? 'none' : '1px solid var(--border)'
-              }}>
-                <div style={{
-                  width: '40px', height: '40px', borderRadius: '50%',
-                  background: 'var(--bg-muted)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '20px'
-                }}>
-                  {getCategoryIcon(categories, exp.category_id)}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: 500, fontSize: '15px', color: 'var(--text-primary)', marginBottom: '2px' }}>
-                    {exp.note || getCategoryName(categories, exp.category_id)}
-                  </p>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
-                    {format(new Date(exp.date), 'dd MMM')} • {exp.payment_method}
-                  </p>
-                </div>
-                <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <p className="amount" style={{ fontSize: '16px', color: 'var(--text-primary)' }}>
-                    {formatCurrency(exp.amount, currency)}
-                  </p>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setDeleteId(exp.id)
-                    }}
-                    style={{ 
-                      background: 'none', border: 'none', color: 'var(--text-muted)', 
-                      cursor: 'pointer', padding: '4px', borderRadius: '4px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--accent-orange)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            ))
+            recentExpenses.map((exp, i) => {
+              const catColor = getCategoryColor(categories, exp.category_id)
+              return (
+                <TransactionRow 
+                  key={exp.id}
+                  icon={getCategoryIcon(categories, exp.category_id)}
+                  title={exp.note || getCategoryName(categories, exp.category_id)}
+                  subtitle={`${format(new Date(exp.date), 'dd MMM')} • ${exp.payment_method}`}
+                  amount={exp.amount}
+                  currency={currency}
+                  isNegative={true}
+                  iconBg={hexToRgba(catColor, 0.15)}
+                  iconColor={catColor}
+                  onClick={() => setDeleteId(exp.id)}
+                />
+              )
+            })
           )}
         </div>
       </section>
@@ -803,19 +801,7 @@ export default function DashboardPage() {
   )
 }
 
-const StatCard = ({ label, value, currency }) => (
-  <div style={{
-    background: 'var(--bg-muted)',
-    borderRadius: '12px',
-    padding: '12px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px'
-  }}>
-    <span className="label-caps" style={{ fontSize: '10px' }}>{label}</span>
-    <span className="amount" style={{ fontSize: '20px' }}>{formatCurrency(value, currency)}</span>
-  </div>
-)
+
 
 const LoadingSkeleton = () => (
   <div style={{ padding: '40px 20px' }}>

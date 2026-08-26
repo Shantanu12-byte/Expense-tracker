@@ -5,9 +5,11 @@ import { formatCurrency, getCategoryColor, getCategoryIcon, getCategoryName, get
 import { format, subMonths, startOfMonth, endOfMonth, getDay, differenceInDays } from 'date-fns'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend,
+  PieChart, Pie
 } from 'recharts'
 import { syncSubscriptions } from '../lib/subscriptionUtils'
 import { motion } from 'framer-motion'
+import { TagChip, ProgressBar, formatCurrency as sharedFormatCurrency } from '../components/SharedUI'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -16,6 +18,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [currentMonthData, setCurrentMonthData] = useState([])
   const [prevMonthData, setPrevMonthData] = useState([])
+  const [reportType, setReportType] = useState('expenses')
   const [dayOfWeekData, setDayOfWeekData] = useState([])
   const [avgDaily, setAvgDaily] = useState(0)
   const [insights, setInsights] = useState([])
@@ -215,19 +218,75 @@ export default function AnalyticsPage() {
       <div className="page-enter">
         {/* Month Comparison Chart */}
         <section className="section-gap">
-          <h2 className="label-caps" style={{ marginBottom: '16px' }}>Category Comparison</h2>
-          <div style={{ height: '240px', width: '100%' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+            <TagChip active={reportType === 'expenses'} onClick={() => setReportType('expenses')}>
+              Expenses
+            </TagChip>
+            <TagChip active={reportType === 'income'} onClick={() => setReportType('income')}>
+              Income
+            </TagChip>
+          </div>
+
+          <div style={{ height: '240px', width: '100%', position: 'relative' }}>
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={currentMonthData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tickFormatter={(v) => currentMonthData.find(d => d.name === v)?.icon || v} />
-                  <YAxis axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-muted)', opacity: 0.5 }} />
-                  <Bar dataKey="current" name="This Month" fill="var(--text-primary)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="previous" name="Last Month" fill="var(--bg-muted)" stroke="var(--border-strong)" strokeWidth={1} radius={[4, 4, 0, 0]} />
-                </BarChart>
+                <PieChart>
+                  <Pie
+                    data={currentMonthData}
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="current"
+                    stroke="none"
+                  >
+                    {currentMonthData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
               </ResponsiveContainer>
             )}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+              <span className="label-caps" style={{ fontSize: '10px' }}>Total</span>
+              <span className="amount" style={{ fontSize: '24px' }}>
+                {sharedFormatCurrency(currentMonthData.reduce((s, d) => s + d.current, 0), currency)}
+              </span>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '24px' }}>
+            {currentMonthData.map((cat, i) => {
+              const total = currentMonthData.reduce((s, d) => s + d.current, 0)
+              const pct = total > 0 ? (cat.current / total) * 100 : 0
+              const colors = ['var(--accent-orange)', 'var(--accent-green)', 'var(--text-muted)', '#D4AF37', 'var(--border-strong)']
+              const color = colors[i % colors.length]
+              const diffPct = cat.previous > 0 ? ((cat.current - cat.previous) / cat.previous) * 100 : 0
+              
+              return (
+                <div key={i} className="glass-card" style={{ padding: '16px', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
+                        {cat.icon}
+                      </div>
+                      <span style={{ fontSize: '15px', fontWeight: 500, color: 'var(--text-primary)' }}>{cat.name}</span>
+                      {diffPct !== 0 && (
+                        <span style={{ 
+                          fontSize: '10px', fontWeight: 600, padding: '4px 8px', borderRadius: '99px',
+                          background: diffPct > 0 ? 'rgba(189, 83, 43, 0.15)' : 'rgba(63, 108, 81, 0.15)',
+                          color: diffPct > 0 ? 'var(--accent-orange)' : 'var(--accent-green)'
+                        }}>
+                          {diffPct > 0 ? '+' : ''}{diffPct.toFixed(0)}%
+                        </span>
+                      )}
+                    </div>
+                    <span className="amount" style={{ fontSize: '16px', color: 'var(--text-primary)' }}>{sharedFormatCurrency(cat.current, currency)}</span>
+                  </div>
+                  <ProgressBar percent={pct} color={cat.color} />
+                </div>
+              )
+            })}
           </div>
         </section>
 

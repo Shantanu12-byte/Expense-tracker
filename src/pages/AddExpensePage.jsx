@@ -9,6 +9,7 @@ import { format } from 'date-fns'
 import { parseSMS } from '../lib/smsParser'
 import { Wand2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { TagChip } from '../components/SharedUI'
 
 const DEFAULT_PRESETS = [
   { label: 'Lunch', amount: 100, icon: '🍽️', categoryName: 'Food' },
@@ -259,7 +260,7 @@ export default function AddExpensePage() {
                 outline: 'none', 
                 width: '100%',
                 maxWidth: '240px',
-                textAlign: 'left',
+                textAlign: 'center',
               }}
               autoFocus
             />
@@ -282,7 +283,7 @@ export default function AddExpensePage() {
         {/* Category Picker */}
         <div style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 className="label-caps">Categories</h3>
+            <h3 className="label-caps">Category</h3>
             <button 
               onClick={() => navigate('/settings')}
               style={{ background: 'none', border: 'none', color: 'var(--accent-orange)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
@@ -290,61 +291,24 @@ export default function AddExpensePage() {
               Manage
             </button>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }} className="no-scrollbar">
             {categories.map(cat => {
-              const todayAmt = todaySpendByCategory[cat.id] || 0
-              const isUsed = todayAmt > 0
-              
+              const isActive = selectedCategory?.id === cat.id
               return (
                 <button
                   key={cat.id}
+                  className="tag pressable"
                   onClick={() => setSelectedCategory(cat)}
                   style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                    padding: '12px 4px', borderRadius: '12px',
-                    background: selectedCategory?.id === cat.id ? 'var(--bg-muted)' : 'transparent',
-                    border: '1px solid',
-                    borderColor: selectedCategory?.id === cat.id ? 'var(--border-strong)' : 'transparent',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    position: 'relative'
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    padding: '10px 16px', borderRadius: '99px',
+                    background: isActive ? 'var(--accent-green)' : 'var(--bg-muted)',
+                    color: isActive ? 'var(--bg-surface)' : 'var(--text-secondary)',
+                    border: 'none', cursor: 'pointer', whiteSpace: 'nowrap'
                   }}
                 >
-                  <div style={{ fontSize: '20px' }}>
-                    {cat.icon}
-                  </div>
-                  <span style={{ 
-                    fontSize: '11px', 
-                    fontWeight: selectedCategory?.id === cat.id ? 600 : 400,
-                    color: selectedCategory?.id === cat.id ? 'var(--text-primary)' : 'var(--text-secondary)',
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    width: '100%'
-                  }}>
-                    {cat.name}
-                  </span>
-                  {todayAmt > 0 && (
-                    <span style={{ 
-                      fontSize: '9px', 
-                      color: 'var(--accent-green)', 
-                      fontWeight: 600,
-                      marginTop: '-2px'
-                    }}>
-                      ₹{todayAmt}
-                    </span>
-                  )}
-                  {selectedCategory?.id === cat.id && (
-                    <div style={{
-                      position: 'absolute', top: '-4px', right: '-4px',
-                      background: 'var(--text-primary)', color: 'white',
-                      borderRadius: '50%', width: '16px', height: '16px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>
-                      <Check size={10} strokeWidth={3} />
-                    </div>
-                  )}
+                  <span style={{ fontSize: '16px' }}>{cat.icon}</span>
+                  <span style={{ fontSize: '13px', fontWeight: isActive ? 600 : 500 }}>{cat.name}</span>
                 </button>
               )
             })}
@@ -361,6 +325,7 @@ export default function AddExpensePage() {
               presets.map((p, i) => (
                 <button
                   key={i}
+                  className="pressable"
                   onClick={() => applyPreset(p)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
@@ -380,36 +345,26 @@ export default function AddExpensePage() {
 
         {/* Note Input */}
         <div style={{ marginBottom: '24px' }}>
+          <label className="label-caps" style={{ display: 'block', marginBottom: '8px' }}>Note</label>
           <input
             type="text"
             value={note}
             onChange={e => setNote(e.target.value)}
-            placeholder="Add a note..."
-            style={{
-              width: '100%',
-              background: 'none',
-              border: 'none',
-              borderBottom: '1px solid var(--border)',
-              padding: '12px 0',
-              fontFamily: 'var(--font-ui)',
-              fontSize: '16px',
-              outline: 'none',
-              color: 'var(--text-primary)'
-            }}
+            placeholder="What was this for?"
+            className="input-field"
+            style={{ border: 'none', background: 'var(--bg-surface)' }}
           />
         </div>
 
         {/* Date Row */}
-        <div style={{ 
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-          padding: '16px 0', borderBottom: '1px solid var(--border)', marginBottom: '24px' 
-        }}>
-          <span className="label-caps">Date</span>
+        <div style={{ marginBottom: '24px' }}>
+          <label className="label-caps" style={{ display: 'block', marginBottom: '8px' }}>Date</label>
           <input
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            style={{ border: 'none', background: 'none', fontFamily: 'var(--font-ui)', fontSize: '14px', color: 'var(--text-primary)', outline: 'none' }}
+            className="input-field"
+            style={{ border: 'none', background: 'var(--bg-surface)' }}
           />
         </div>
 
@@ -417,20 +372,15 @@ export default function AddExpensePage() {
         <div style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }} className="no-scrollbar">
             {PAYMENT_METHODS.map(m => (
-              <button
+              <TagChip
                 key={m}
+                active={paymentMethod === m}
                 onClick={() => setPaymentMethod(m)}
-                style={{
-                  padding: '6px 16px', borderRadius: '99px', cursor: 'pointer',
-                  background: paymentMethod === m ? 'var(--text-primary)' : 'var(--bg-muted)',
-                  border: 'none',
-                  color: paymentMethod === m ? 'white' : 'var(--text-secondary)',
-                  fontSize: '12px', fontWeight: 500, transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap'
-                }}
+                className="pressable"
+                style={{ padding: '6px 16px', fontSize: '12px' }}
               >
                 {m}
-              </button>
+              </TagChip>
             ))}
           </div>
         </div>
